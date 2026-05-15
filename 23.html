@@ -1,0 +1,1287 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>司法生态修复碳汇管理平台</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://cdn.jsdelivr.net/npm/font-awesome@4.7.0/css/font-awesome.min.css" rel="stylesheet">
+    <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.8/dist/chart.umd.min.js"></script>
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    colors: {
+                        primary: '#165DFF',
+                        success: '#00B42A',
+                        danger: '#F53F3F',
+                        warning: '#FF7D00',
+                        dark: '#1D2129',
+                        'gray-600': '#4E5969',
+                        'gray-100': '#F2F3F5',
+                    },
+                    fontFamily: {
+                        sans: ['Inter', 'system-ui', 'sans-serif'],
+                    },
+                }
+            }
+        }
+    </script>
+    <style type="text/tailwindcss">
+        @layer utilities {
+            .content-auto {
+                content-visibility: auto;
+            }
+            .text-shadow {
+                text-shadow: 0 2px 4px rgba(0,0,0,0.1);
+            }
+            .card-hover {
+                transition: all 0.3s ease;
+            }
+            .card-hover:hover {
+                transform: translateY(-5px);
+                box-shadow: 0 10px 25px -5px rgba(22, 93, 255, 0.1);
+            }
+            .nav-sticky {
+                backdrop-filter: blur(8px);
+                background-color: rgba(255, 255, 255, 0.95);
+            }
+        }
+    </style>
+</head>
+<body class="font-sans text-dark bg-gray-50">
+    <!-- 导航栏 -->
+    <nav id="navbar" class="fixed w-full z-50 transition-all duration-300">
+        <div class="container mx-auto px-4 py-3 flex items-center justify-between">
+            <div class="flex items-center space-x-2">
+                <i class="fa fa-balance-scale text-primary text-2xl"></i>
+                <span class="text-xl font-bold text-primary">司法生态修复碳汇管理平台</span>
+            </div>
+
+            <div class="hidden md:flex items-center space-x-8">
+                <a href="#home" class="text-dark hover:text-primary transition-colors">首页</a>
+                <a href="#intro" class="text-dark hover:text-primary transition-colors">平台介绍</a>
+                <a href="#features" class="text-dark hover:text-primary transition-colors">三端功能</a>
+                <a href="#process" class="text-dark hover:text-primary transition-colors">工作流程</a>
+                <a href="#data" class="text-dark hover:text-primary transition-colors">数据公示</a>
+                <a href="#policy" class="text-dark hover:text-primary transition-colors">政策法规</a>
+            </div>
+
+            <div class="relative group">
+                <button class="bg-primary text-white px-4 py-2 rounded-md flex items-center space-x-2 hover:bg-primary/90 transition-colors">
+                    <span>登录</span>
+                    <i class="fa fa-caret-down"></i>
+                </button>
+                <div class="absolute right-0 mt-2 w-48 bg-white rounded-md shadow-lg opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all duration-300">
+                    <a href="javascript:void(0)" onclick="showLoginModal('party')" class="block px-4 py-2 text-gray-700 hover:bg-gray-100">当事人登录</a>
+                    <a href="javascript:void(0)" onclick="showLoginModal('judge')" class="block px-4 py-2 text-gray-700 hover:bg-gray-100">司法人员登录</a>
+                    <a href="javascript:void(0)" onclick="showLoginModal('admin')" class="block px-4 py-2 text-gray-700 hover:bg-gray-100">管理部门登录</a>
+                </div>
+            </div>
+
+            <button class="md:hidden text-dark text-xl">
+                <i class="fa fa-bars"></i>
+            </button>
+        </div>
+    </nav>
+
+    <!-- 英雄区 -->
+    <section id="home" class="pt-24 pb-16 md:pt-32 md:pb-24 bg-gradient-to-br from-primary/5 to-success/5">
+        <div class="container mx-auto px-4">
+            <div class="flex flex-col md:flex-row items-center">
+                <div class="md:w-1/2 mb-10 md:mb-0">
+                    <h1 class="text-[clamp(2rem,5vw,3.5rem)] font-bold text-dark leading-tight text-shadow mb-4">
+                        司法护航绿水青山<br>
+                        <span class="text-primary">碳汇助力生态修复</span>
+                    </h1>
+                    <p class="text-gray-600 text-lg mb-8">
+                        贵州省首个"司法+碳汇"一体化智能管理平台，实现案件管理、损失评估、修复监督、碳汇核证全流程闭环
+                    </p>
+                    <div class="flex space-x-4">
+                        <button onclick="showLoginModal('judge')" class="bg-primary text-white px-6 py-3 rounded-md hover:bg-primary/90 transition-colors font-medium">
+                            立即登录
+                        </button>
+                        <button class="border border-primary text-primary px-6 py-3 rounded-md hover:bg-primary/5 transition-colors font-medium">
+                            平台演示
+                        </button>
+                    </div>
+                </div>
+                <div class="md:w-1/2">
+                    <img src="https://picsum.photos/id/1043/600/400" alt="贵州山水风光" class="rounded-lg shadow-xl w-full">
+                </div>
+            </div>
+
+            <!-- 核心数据看板 -->
+            <div class="grid grid-cols-2 md:grid-cols-4 gap-4 mt-16">
+                <div class="bg-white rounded-lg p-6 shadow-md card-hover">
+                    <div class="text-3xl font-bold text-primary mb-2" id="case-count">128</div>
+                    <div class="text-gray-600">累计受理生态案件</div>
+                </div>
+                <div class="bg-white rounded-lg p-6 shadow-md card-hover">
+                    <div class="text-3xl font-bold text-success mb-2" id="area-count">3,562</div>
+                    <div class="text-gray-600">完成生态修复面积(亩)</div>
+                </div>
+                <div class="bg-white rounded-lg p-6 shadow-md card-hover">
+                    <div class="text-3xl font-bold text-primary mb-2" id="carbon-count">12,458</div>
+                    <div class="text-gray-600">核证碳汇总量(tCO₂e)</div>
+                </div>
+                <div class="bg-white rounded-lg p-6 shadow-md card-hover">
+                    <div class="text-3xl font-bold text-success mb-2" id="survival-rate">96.8%</div>
+                    <div class="text-gray-600">苗木成活率</div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- 平台优势 -->
+    <section id="intro" class="py-16 bg-white">
+        <div class="container mx-auto px-4">
+            <div class="text-center mb-12">
+                <h2 class="text-3xl font-bold mb-4">平台核心优势</h2>
+                <p class="text-gray-600 max-w-2xl mx-auto">
+                    融合司法权威与生态保护，打造全流程可追溯、跨部门协同的智能化管理体系
+                </p>
+            </div>
+
+            <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+                <div class="bg-gray-50 rounded-lg p-6 card-hover">
+                    <div class="w-12 h-12 bg-primary/10 rounded-full flex items-center justify-center mb-4">
+                        <i class="fa fa-gavel text-primary text-xl"></i>
+                    </div>
+                    <h3 class="text-xl font-bold mb-2">司法权威背书</h3>
+                    <p class="text-gray-600">
+                        法院直接采信碳汇核证结果，作为量刑参考和悔罪表现认定依据
+                    </p>
+                </div>
+                <div class="bg-gray-50 rounded-lg p-6 card-hover">
+                    <div class="w-12 h-12 bg-primary/10 rounded-full flex items-center justify-center mb-4">
+                        <i class="fa fa-chain text-primary text-xl"></i>
+                    </div>
+                    <h3 class="text-xl font-bold mb-2">全流程可追溯</h3>
+                    <p class="text-gray-600">
+                        区块链存证技术，所有数据不可篡改、全程留痕，确保司法公正
+                    </p>
+                </div>
+                <div class="bg-gray-50 rounded-lg p-6 card-hover">
+                    <div class="w-12 h-12 bg-primary/10 rounded-full flex items-center justify-center mb-4">
+                        <i class="fa fa-cogs text-primary text-xl"></i>
+                    </div>
+                    <h3 class="text-xl font-bold mb-2">智能化高效处理</h3>
+                    <p class="text-gray-600">
+                        AI自动评估生态损失、智能推荐修复方案、自动核验修复效果
+                    </p>
+                </div>
+                <div class="bg-gray-50 rounded-lg p-6 card-hover">
+                    <div class="w-12 h-12 bg-primary/10 rounded-full flex items-center justify-center mb-4">
+                        <i class="fa fa-handshake-o text-primary text-xl"></i>
+                    </div>
+                    <h3 class="text-xl font-bold mb-2">跨部门协同</h3>
+                    <p class="text-gray-600">
+                        法院、检察院、林草局、碳交易所数据实时互通，打破信息孤岛
+                    </p>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- 三端功能 -->
+    <section id="features" class="py-16 bg-gray-50">
+        <div class="container mx-auto px-4">
+            <div class="text-center mb-12">
+                <h2 class="text-3xl font-bold mb-4">三端功能全景</h2>
+                <p class="text-gray-600 max-w-2xl mx-auto">
+                    覆盖当事人、司法人员、管理部门三大角色，实现全链条闭环管理
+                </p>
+            </div>
+
+            <div class="grid grid-cols-1 lg:grid-cols-3 gap-8">
+                <!-- 法官/检察官端 -->
+                <div class="bg-white rounded-lg shadow-md overflow-hidden card-hover">
+                    <div class="bg-primary text-white p-6">
+                        <div class="flex items-center space-x-3 mb-2">
+                            <i class="fa fa-gavel text-2xl"></i>
+                            <h3 class="text-xl font-bold">法官/检察官端</h3>
+                        </div>
+                        <p class="opacity-90">案件全生命周期管理，智能辅助司法裁判</p>
+                    </div>
+                    <div class="p-6">
+                        <ul class="space-y-3">
+                            <li class="flex items-start space-x-2">
+                                <i class="fa fa-check-circle text-primary mt-1"></i>
+                                <span>案件信息标准化录入与管理</span>
+                            </li>
+                            <li class="flex items-start space-x-2">
+                                <i class="fa fa-check-circle text-primary mt-1"></i>
+                                <span>生态损失自动量化评估</span>
+                            </li>
+                            <li class="flex items-start space-x-2">
+                                <i class="fa fa-check-circle text-primary mt-1"></i>
+                                <span>修复方案智能匹配推荐</span>
+                            </li>
+                            <li class="flex items-start space-x-2">
+                                <i class="fa fa-check-circle text-primary mt-1"></i>
+                                <span>修复进度AI核验+人工复核</span>
+                            </li>
+                            <li class="flex items-start space-x-2">
+                                <i class="fa fa-check-circle text-primary mt-1"></i>
+                                <span>一键生成司法文书与结案确认</span>
+                            </li>
+                        </ul>
+                    </div>
+                </div>
+
+                <!-- 林草局/碳交易所端 -->
+                <div class="bg-white rounded-lg shadow-md overflow-hidden card-hover">
+                    <div class="bg-success text-white p-6">
+                        <div class="flex items-center space-x-3 mb-2">
+                            <i class="fa fa-leaf text-2xl"></i>
+                            <h3 class="text-xl font-bold">林草局/碳交易所端</h3>
+                        </div>
+                        <p class="opacity-90">碳汇项目管理与核证，数据台账自动生成</p>
+                    </div>
+                    <div class="p-6">
+                        <ul class="space-y-3">
+                            <li class="flex items-start space-x-2">
+                                <i class="fa fa-check-circle text-success mt-1"></i>
+                                <span>司法可用碳汇项目发布与准入审核</span>
+                            </li>
+                            <li class="flex items-start space-x-2">
+                                <i class="fa fa-check-circle text-success mt-1"></i>
+                                <span>碳汇量智能核算与确权</span>
+                            </li>
+                            <li class="flex items-start space-x-2">
+                                <i class="fa fa-check-circle text-success mt-1"></i>
+                                <span>司法碳汇核证证书生成与上链</span>
+                            </li>
+                            <li class="flex items-start space-x-2">
+                                <i class="fa fa-check-circle text-success mt-1"></i>
+                                <span>全省数据可视化大屏展示</span>
+                            </li>
+                            <li class="flex items-start space-x-2">
+                                <i class="fa fa-check-circle text-success mt-1"></i>
+                                <span>自动生成月度台账与考核报表</span>
+                            </li>
+                        </ul>
+                    </div>
+                </div>
+
+                <!-- 当事人端 -->
+                <div class="bg-white rounded-lg shadow-md overflow-hidden card-hover">
+                    <div class="bg-warning text-white p-6">
+                        <div class="flex items-center space-x-3 mb-2">
+                            <i class="fa fa-user text-2xl"></i>
+                            <h3 class="text-xl font-bold">当事人端</h3>
+                        </div>
+                        <p class="opacity-90">便捷完成修复义务，透明化流程体验</p>
+                    </div>
+                    <div class="p-6">
+                        <ul class="space-y-3">
+                            <li class="flex items-start space-x-2">
+                                <i class="fa fa-check-circle text-warning mt-1"></i>
+                                <span>查看案件修复要求与期限</span>
+                            </li>
+                            <li class="flex items-start space-x-2">
+                                <i class="fa fa-check-circle text-warning mt-1"></i>
+                                <span>上传修复过程照片与定位</span>
+                            </li>
+                            <li class="flex items-start space-x-2">
+                                <i class="fa fa-check-circle text-warning mt-1"></i>
+                                <span>在线认购司法碳汇项目</span>
+                            </li>
+                            <li class="flex items-start space-x-2">
+                                <i class="fa fa-check-circle text-warning mt-1"></i>
+                                <span>查看修复进度审核结果</span>
+                            </li>
+                            <li class="flex items-start space-x-2">
+                                <i class="fa fa-check-circle text-warning mt-1"></i>
+                                <span>下载生态修复完成证明书</span>
+                            </li>
+                        </ul>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- 工作流程 -->
+    <section id="process" class="py-16 bg-white">
+        <div class="container mx-auto px-4">
+            <div class="text-center mb-12">
+                <h2 class="text-3xl font-bold mb-4">全流程闭环管理</h2>
+                <p class="text-gray-600 max-w-2xl mx-auto">
+                    从案件受理到结案归档，7个步骤实现生态修复全流程数字化管理
+                </p>
+            </div>
+
+            <div class="relative">
+                <!-- 时间轴 -->
+                <div class="hidden md:block absolute left-1/2 top-0 bottom-0 w-1 bg-gray-200 transform -translate-x-1/2"></div>
+
+                <div class="space-y-12">
+                    <!-- 步骤1 -->
+                    <div class="flex flex-col md:flex-row items-center">
+                        <div class="md:w-1/2 md:pr-12 md:text-right mb-4 md:mb-0">
+                            <h3 class="text-xl font-bold mb-2">案件信息录入</h3>
+                            <p class="text-gray-600">司法人员录入案件基本信息、判决要点和修复要求</p>
+                        </div>
+                        <div class="z-10 w-12 h-12 bg-primary rounded-full flex items-center justify-center text-white font-bold">1</div>
+                        <div class="md:w-1/2 md:pl-12"></div>
+                    </div>
+
+                    <!-- 步骤2 -->
+                    <div class="flex flex-col md:flex-row items-center">
+                        <div class="md:w-1/2 md:pr-12"></div>
+                        <div class="z-10 w-12 h-12 bg-primary rounded-full flex items-center justify-center text-white font-bold">2</div>
+                        <div class="md:w-1/2 md:pl-12 mb-4 md:mb-0">
+                            <h3 class="text-xl font-bold mb-2">生态损失评估</h3>
+                            <p class="text-gray-600">系统依据国家标准自动计算生态损失与碳汇损失量</p>
+                        </div>
+                    </div>
+
+                    <!-- 步骤3 -->
+                    <div class="flex flex-col md:flex-row items-center">
+                        <div class="md:w-1/2 md:pr-12 md:text-right mb-4 md:mb-0">
+                            <h3 class="text-xl font-bold mb-2">修复方案生成</h3>
+                            <p class="text-gray-600">智能生成个性化修复方案，支持碳汇替代选项</p>
+                        </div>
+                        <div class="z-10 w-12 h-12 bg-primary rounded-full flex items-center justify-center text-white font-bold">3</div>
+                        <div class="md:w-1/2 md:pl-12"></div>
+                    </div>
+
+                    <!-- 步骤4 -->
+                    <div class="flex flex-col md:flex-row items-center">
+                        <div class="md:w-1/2 md:pr-12"></div>
+                        <div class="z-10 w-12 h-12 bg-primary rounded-full flex items-center justify-center text-white font-bold">4</div>
+                        <div class="md:w-1/2 md:pl-12 mb-4 md:mb-0">
+                            <h3 class="text-xl font-bold mb-2">当事人执行修复</h3>
+                            <p class="text-gray-600">当事人执行修复或在线认购司法碳汇项目</p>
+                        </div>
+                    </div>
+
+                    <!-- 步骤5 -->
+                    <div class="flex flex-col md:flex-row items-center">
+                        <div class="md:w-1/2 md:pr-12 md:text-right mb-4 md:mb-0">
+                            <h3 class="text-xl font-bold mb-2">修复效果核验</h3>
+                            <p class="text-gray-600">AI自动核验+人工复核，确保修复效果达标</p>
+                        </div>
+                        <div class="z-10 w-12 h-12 bg-primary rounded-full flex items-center justify-center text-white font-bold">5</div>
+                        <div class="md:w-1/2 md:pl-12"></div>
+                    </div>
+
+                    <!-- 步骤6 -->
+                    <div class="flex flex-col md:flex-row items-center">
+                        <div class="md:w-1/2 md:pr-12"></div>
+                        <div class="z-10 w-12 h-12 bg-primary rounded-full flex items-center justify-center text-white font-bold">6</div>
+                        <div class="md:w-1/2 md:pl-12 mb-4 md:mb-0">
+                            <h3 class="text-xl font-bold mb-2">碳汇核证上链</h3>
+                            <p class="text-gray-600">生成碳汇核证证书，数据上链存证，不可篡改</p>
+                        </div>
+                    </div>
+
+                    <!-- 步骤7 -->
+                    <div class="flex flex-col md:flex-row items-center">
+                        <div class="md:w-1/2 md:pr-12 md:text-right mb-4 md:mb-0">
+                            <h3 class="text-xl font-bold mb-2">案件结案归档</h3>
+                            <p class="text-gray-600">生成修复完成证明，案件结案，材料一键入卷</p>
+                        </div>
+                        <div class="z-10 w-12 h-12 bg-success rounded-full flex items-center justify-center text-white font-bold">7</div>
+                        <div class="md:w-1/2 md:pl-12"></div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- 数据公示 -->
+    <section id="data" class="py-16 bg-gray-50">
+        <div class="container mx-auto px-4">
+            <div class="text-center mb-12">
+                <h2 class="text-3xl font-bold mb-4">数据公示</h2>
+                <p class="text-gray-600 max-w-2xl mx-auto">
+                    公开透明展示全省生态修复与碳汇核证数据
+                </p>
+            </div>
+
+            <!-- 核心数据概览 -->
+            <div class="grid grid-cols-2 md:grid-cols-4 gap-6 mb-8">
+                <div class="bg-white rounded-lg shadow-md p-6 card-hover">
+                    <div class="flex items-center justify-between mb-4">
+                        <div class="w-12 h-12 bg-primary/10 rounded-full flex items-center justify-center">
+                            <i class="fa fa-file-text-o text-primary text-xl"></i>
+                        </div>
+                        <span class="text-success text-sm font-medium flex items-center">
+                            <i class="fa fa-arrow-up mr-1"></i> 12.5%
+                        </span>
+                    </div>
+                    <div class="text-3xl font-bold text-dark mb-1" id="data-case-count">128</div>
+                    <div class="text-gray-600">累计受理生态案件</div>
+                </div>
+                <div class="bg-white rounded-lg shadow-md p-6 card-hover">
+                    <div class="flex items-center justify-between mb-4">
+                        <div class="w-12 h-12 bg-success/10 rounded-full flex items-center justify-center">
+                            <i class="fa fa-tree text-success text-xl"></i>
+                        </div>
+                        <span class="text-success text-sm font-medium flex items-center">
+                            <i class="fa fa-arrow-up mr-1"></i> 8.3%
+                        </span>
+                    </div>
+                    <div class="text-3xl font-bold text-dark mb-1" id="data-area-count">3,562</div>
+                    <div class="text-gray-600">完成生态修复面积(亩)</div>
+                </div>
+                <div class="bg-white rounded-lg shadow-md p-6 card-hover">
+                    <div class="flex items-center justify-between mb-4">
+                        <div class="w-12 h-12 bg-warning/10 rounded-full flex items-center justify-center">
+                            <i class="fa fa-leaf text-warning text-xl"></i>
+                        </div>
+                        <span class="text-success text-sm font-medium flex items-center">
+                            <i class="fa fa-arrow-up mr-1"></i> 15.2%
+                        </span>
+                    </div>
+                    <div class="text-3xl font-bold text-dark mb-1" id="data-carbon-count">12,458</div>
+                    <div class="text-gray-600">核证碳汇总量(tCO₂e)</div>
+                </div>
+                <div class="bg-white rounded-lg shadow-md p-6 card-hover">
+                    <div class="flex items-center justify-between mb-4">
+                        <div class="w-12 h-12 bg-primary/10 rounded-full flex items-center justify-center">
+                            <i class="fa fa-check-circle text-primary text-xl"></i>
+                        </div>
+                        <span class="text-success text-sm font-medium flex items-center">
+                            <i class="fa fa-arrow-up mr-1"></i> 2.1%
+                        </span>
+                    </div>
+                    <div class="text-3xl font-bold text-dark mb-1" id="data-completion-rate">94.6%</div>
+                    <div class="text-gray-600">修复完成率</div>
+                </div>
+            </div>
+
+            <!-- 图表区域 -->
+            <div class="grid grid-cols-1 lg:grid-cols-2 gap-8 mb-8">
+                <div class="bg-white rounded-lg shadow-md p-6">
+                    <div class="flex items-center justify-between mb-4">
+                        <h3 class="text-lg font-bold">案件类型分布</h3>
+                        <select id="caseTypeFilter" class="text-sm border rounded px-2 py-1 focus:outline-none focus:ring-2 focus:ring-primary/50">
+                            <option value="all">全部类型</option>
+                            <option value="forest">林业类</option>
+                            <option value="water">水环境类</option>
+                        </select>
+                    </div>
+                    <div class="h-64">
+                        <canvas id="caseTypeChart"></canvas>
+                    </div>
+                </div>
+                <div class="bg-white rounded-lg shadow-md p-6">
+                    <div class="flex items-center justify-between mb-4">
+                        <h3 class="text-lg font-bold">修复完成率趋势</h3>
+                        <div class="flex space-x-2">
+                            <button onclick="switchChartPeriod('month')" class="px-3 py-1 text-sm rounded bg-primary text-white" id="btn-month">月度</button>
+                            <button onclick="switchChartPeriod('quarter')" class="px-3 py-1 text-sm rounded bg-gray-100 text-gray-600 hover:bg-gray-200" id="btn-quarter">季度</button>
+                            <button onclick="switchChartPeriod('year')" class="px-3 py-1 text-sm rounded bg-gray-100 text-gray-600 hover:bg-gray-200" id="btn-year">年度</button>
+                        </div>
+                    </div>
+                    <div class="h-64">
+                        <canvas id="completionRateChart"></canvas>
+                    </div>
+                </div>
+            </div>
+
+            <!-- 地图和表格区域 -->
+            <div class="grid grid-cols-1 lg:grid-cols-2 gap-8">
+                <div class="bg-white rounded-lg shadow-md p-6">
+                    <div class="flex items-center justify-between mb-4">
+                        <h3 class="text-xl font-bold">全省修复点位分布</h3>
+                        <div class="flex space-x-4 text-sm">
+                            <span class="flex items-center"><span class="w-3 h-3 rounded-full bg-primary mr-2"></span>已修复</span>
+                            <span class="flex items-center"><span class="w-3 h-3 rounded-full bg-warning mr-2"></span>修复中</span>
+                            <span class="flex items-center"><span class="w-3 h-3 rounded-full bg-gray-300 mr-2"></span>待修复</span>
+                        </div>
+                    </div>
+                    <div class="h-80 bg-gradient-to-br from-green-50 to-blue-50 rounded-lg relative overflow-hidden">
+                        <svg class="w-full h-full" viewBox="0 0 400 320" xmlns="http://www.w3.org/2000/svg">
+                            <!-- 简化的贵州省地图轮廓 -->
+                            <path d="M120,40 Q180,30 220,50 Q260,40 280,80 Q320,100 300,150 Q320,180 290,220 Q270,260 230,280 Q200,300 160,290 Q120,300 90,270 Q60,240 70,200 Q50,160 70,130 Q60,90 90,70 Q100,50 120,40 Z" fill="url(#mapGradient)" stroke="#165DFF" stroke-width="2"/>
+                            <defs>
+                                <linearGradient id="mapGradient" x1="0%" y1="0%" x2="100%" y2="100%">
+                                    <stop offset="0%" style="stop-color:#E6F7FF;stop-opacity:1" />
+                                    <stop offset="100%" style="stop-color:#D1FAE5;stop-opacity:1" />
+                                </linearGradient>
+                            </defs>
+                            <!-- 修复点位 -->
+                            <circle cx="150" cy="100" r="6" fill="#165DFF" class="animate-pulse">
+                                <title>贵阳: 45个点位</title>
+                            </circle>
+                            <circle cx="200" cy="80" r="5" fill="#165DFF">
+                                <title>遵义: 38个点位</title>
+                            </circle>
+                            <circle cx="180" cy="150" r="5" fill="#FF7D00">
+                                <title>安顺: 25个点位</title>
+                            </circle>
+                            <circle cx="250" cy="140" r="5" fill="#165DFF">
+                                <title>凯里: 32个点位</title>
+                            </circle>
+                            <circle cx="130" cy="200" r="4" fill="#D1D5DB">
+                                <title>六盘水: 18个点位</title>
+                            </circle>
+                            <circle cx="220" cy="220" r="4" fill="#165DFF">
+                                <title>都匀: 22个点位</title>
+                            </circle>
+                            <circle cx="100" cy="150" r="4" fill="#FF7D00">
+                                <title>毕节: 28个点位</title>
+                            </circle>
+                            <circle cx="280" cy="180" r="4" fill="#165DFF">
+                                <title>铜仁: 20个点位</title>
+                            </circle>
+                            <circle cx="170" cy="250" r="4" fill="#165DFF">
+                                <title>兴义: 19个点位</title>
+                            </circle>
+                        </svg>
+                    </div>
+                </div>
+                <div class="bg-white rounded-lg shadow-md p-6">
+                    <div class="flex items-center justify-between mb-4">
+                        <h3 class="text-xl font-bold">各地区数据排行</h3>
+                        <button class="text-primary text-sm hover:underline">查看全部</button>
+                    </div>
+                    <div class="overflow-x-auto">
+                        <table class="w-full">
+                            <thead>
+                                <tr class="border-b">
+                                    <th class="text-left py-3 px-2 text-gray-600 text-sm">排名</th>
+                                    <th class="text-left py-3 px-2 text-gray-600 text-sm">地区</th>
+                                    <th class="text-left py-3 px-2 text-gray-600 text-sm">案件数</th>
+                                    <th class="text-left py-3 px-2 text-gray-600 text-sm">修复面积(亩)</th>
+                                    <th class="text-left py-3 px-2 text-gray-600 text-sm">完成率</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <tr class="border-b hover:bg-gray-50">
+                                    <td class="py-3 px-2"><span class="bg-primary text-white w-6 h-6 rounded-full inline-flex items-center justify-center text-sm font-bold">1</span></td>
+                                    <td class="py-3 px-2 font-medium">贵阳市</td>
+                                    <td class="py-3 px-2">45</td>
+                                    <td class="py-3 px-2">1,235</td>
+                                    <td class="py-3 px-2"><span class="text-success font-medium">96.8%</span></td>
+                                </tr>
+                                <tr class="border-b hover:bg-gray-50">
+                                    <td class="py-3 px-2"><span class="bg-gray-400 text-white w-6 h-6 rounded-full inline-flex items-center justify-center text-sm font-bold">2</span></td>
+                                    <td class="py-3 px-2 font-medium">遵义市</td>
+                                    <td class="py-3 px-2">38</td>
+                                    <td class="py-3 px-2">986</td>
+                                    <td class="py-3 px-2"><span class="text-success font-medium">95.2%</span></td>
+                                </tr>
+                                <tr class="border-b hover:bg-gray-50">
+                                    <td class="py-3 px-2"><span class="bg-warning text-white w-6 h-6 rounded-full inline-flex items-center justify-center text-sm font-bold">3</span></td>
+                                    <td class="py-3 px-2 font-medium">毕节市</td>
+                                    <td class="py-3 px-2">28</td>
+                                    <td class="py-3 px-2">756</td>
+                                    <td class="py-3 px-2"><span class="text-warning font-medium">88.5%</span></td>
+                                </tr>
+                                <tr class="border-b hover:bg-gray-50">
+                                    <td class="py-3 px-2"><span class="bg-gray-300 text-gray-700 w-6 h-6 rounded-full inline-flex items-center justify-center text-sm">4</span></td>
+                                    <td class="py-3 px-2 font-medium">黔东南州</td>
+                                    <td class="py-3 px-2">32</td>
+                                    <td class="py-3 px-2">586</td>
+                                    <td class="py-3 px-2"><span class="text-success font-medium">92.3%</span></td>
+                                </tr>
+                                <tr class="hover:bg-gray-50">
+                                    <td class="py-3 px-2"><span class="bg-gray-300 text-gray-700 w-6 h-6 rounded-full inline-flex items-center justify-center text-sm">5</span></td>
+                                    <td class="py-3 px-2 font-medium">黔南州</td>
+                                    <td class="py-3 px-2">22</td>
+                                    <td class="py-3 px-2">486</td>
+                                    <td class="py-3 px-2"><span class="text-success font-medium">90.1%</span></td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+
+            <!-- 碳汇核证详情 -->
+            <div class="mt-8 bg-white rounded-lg shadow-md p-6">
+                <div class="flex items-center justify-between mb-6">
+                    <h3 class="text-xl font-bold">碳汇核证项目列表</h3>
+                    <div class="flex space-x-4">
+                        <input type="text" placeholder="搜索项目..." class="px-4 py-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-primary/50">
+                        <button class="bg-primary text-white px-4 py-2 rounded-md hover:bg-primary/90 transition-colors">
+                            <i class="fa fa-download mr-2"></i> 导出数据
+                        </button>
+                    </div>
+                </div>
+                <div class="overflow-x-auto">
+                    <table class="w-full">
+                        <thead>
+                            <tr class="bg-gray-50">
+                                <th class="text-left py-4 px-4 font-semibold text-gray-700">项目编号</th>
+                                <th class="text-left py-4 px-4 font-semibold text-gray-700">项目名称</th>
+                                <th class="text-left py-4 px-4 font-semibold text-gray-700">所在地区</th>
+                                <th class="text-left py-4 px-4 font-semibold text-gray-700">核证碳汇量(t)</th>
+                                <th class="text-left py-4 px-4 font-semibold text-gray-700">核证日期</th>
+                                <th class="text-left py-4 px-4 font-semibold text-gray-700">状态</th>
+                                <th class="text-left py-4 px-4 font-semibold text-gray-700">操作</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr class="border-b hover:bg-gray-50">
+                                <td class="py-4 px-4 text-primary">GZ-TH-2025-001</td>
+                                <td class="py-4 px-4 font-medium">贵阳市花溪区生态修复碳汇项目</td>
+                                <td class="py-4 px-4">贵阳市</td>
+                                <td class="py-4 px-4 font-bold text-success">2,345</td>
+                                <td class="py-4 px-4">2025-05-15</td>
+                                <td class="py-4 px-4"><span class="bg-success/10 text-success px-3 py-1 rounded-full text-sm">已核证</span></td>
+                                <td class="py-4 px-4">
+                                    <a href="#" class="text-primary hover:underline">查看详情</a>
+                                </td>
+                            </tr>
+                            <tr class="border-b hover:bg-gray-50">
+                                <td class="py-4 px-4 text-primary">GZ-TH-2025-002</td>
+                                <td class="py-4 px-4 font-medium">遵义市赤水河流域生态修复项目</td>
+                                <td class="py-4 px-4">遵义市</td>
+                                <td class="py-4 px-4 font-bold text-success">1,856</td>
+                                <td class="py-4 px-4">2025-05-12</td>
+                                <td class="py-4 px-4"><span class="bg-success/10 text-success px-3 py-1 rounded-full text-sm">已核证</span></td>
+                                <td class="py-4 px-4">
+                                    <a href="#" class="text-primary hover:underline">查看详情</a>
+                                </td>
+                            </tr>
+                            <tr class="border-b hover:bg-gray-50">
+                                <td class="py-4 px-4 text-primary">GZ-TH-2025-003</td>
+                                <td class="py-4 px-4 font-medium">毕节市森林碳汇项目</td>
+                                <td class="py-4 px-4">毕节市</td>
+                                <td class="py-4 px-4 font-bold text-warning">-</td>
+                                <td class="py-4 px-4">-</td>
+                                <td class="py-4 px-4"><span class="bg-warning/10 text-warning px-3 py-1 rounded-full text-sm">审核中</span></td>
+                                <td class="py-4 px-4">
+                                    <a href="#" class="text-primary hover:underline">查看详情</a>
+                                </td>
+                            </tr>
+                            <tr class="border-b hover:bg-gray-50">
+                                <td class="py-4 px-4 text-primary">GZ-TH-2024-098</td>
+                                <td class="py-4 px-4 font-medium">黔东南州林业碳汇项目</td>
+                                <td class="py-4 px-4">黔东南州</td>
+                                <td class="py-4 px-4 font-bold text-success">1,567</td>
+                                <td class="py-4 px-4">2024-12-28</td>
+                                <td class="py-4 px-4"><span class="bg-success/10 text-success px-3 py-1 rounded-full text-sm">已核证</span></td>
+                                <td class="py-4 px-4">
+                                    <a href="#" class="text-primary hover:underline">查看详情</a>
+                                </td>
+                            </tr>
+                            <tr class="hover:bg-gray-50">
+                                <td class="py-4 px-4 text-primary">GZ-TH-2024-097</td>
+                                <td class="py-4 px-4 font-medium">黔南州生态修复碳汇项目</td>
+                                <td class="py-4 px-4">黔南州</td>
+                                <td class="py-4 px-4 font-bold text-success">1,234</td>
+                                <td class="py-4 px-4">2024-11-20</td>
+                                <td class="py-4 px-4"><span class="bg-success/10 text-success px-3 py-1 rounded-full text-sm">已核证</span></td>
+                                <td class="py-4 px-4">
+                                    <a href="#" class="text-primary hover:underline">查看详情</a>
+                                </td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+                <div class="flex items-center justify-between mt-6">
+                    <p class="text-gray-600 text-sm">显示 1-5 条，共 45 条记录</p>
+                    <div class="flex space-x-2">
+                        <button class="px-3 py-1 border rounded hover:bg-gray-50 disabled:opacity-50" disabled>上一页</button>
+                        <button class="px-3 py-1 bg-primary text-white rounded">1</button>
+                        <button class="px-3 py-1 border rounded hover:bg-gray-50">2</button>
+                        <button class="px-3 py-1 border rounded hover:bg-gray-50">3</button>
+                        <span class="px-2 py-1">...</span>
+                        <button class="px-3 py-1 border rounded hover:bg-gray-50">9</button>
+                        <button class="px-3 py-1 border rounded hover:bg-gray-50">下一页</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- 政策法规 -->
+    <section id="policy" class="py-16 bg-white">
+        <div class="container mx-auto px-4">
+            <div class="text-center mb-12">
+                <h2 class="text-3xl font-bold mb-4">政策法规</h2>
+                <p class="text-gray-600 max-w-2xl mx-auto">
+                    生态修复与碳汇管理相关法律法规与政策文件
+                </p>
+            </div>
+
+            <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                <div class="bg-gray-50 rounded-lg p-6 card-hover">
+                    <h3 class="text-lg font-bold mb-2">贵州省林业碳票管理办法</h3>
+                    <p class="text-gray-600 mb-4">
+                        规范林业碳票的制发、登记、流转、质押和管理，保障碳票持有人的合法权益
+                    </p>
+                    <a href="#" class="text-primary hover:underline">查看详情 <i class="fa fa-arrow-right ml-1"></i></a>
+                </div>
+                <div class="bg-gray-50 rounded-lg p-6 card-hover">
+                    <h3 class="text-lg font-bold mb-2">生态环境损害赔偿管理规定</h3>
+                    <p class="text-gray-600 mb-4">
+                        规范生态环境损害赔偿工作，推进生态文明建设，保护和改善生态环境
+                    </p>
+                    <a href="#" class="text-primary hover:underline">查看详情 <i class="fa fa-arrow-right ml-1"></i></a>
+                </div>
+                <div class="bg-gray-50 rounded-lg p-6 card-hover">
+                    <h3 class="text-lg font-bold mb-2">贵州省单株碳汇精准扶贫办法</h3>
+                    <p class="text-gray-600 mb-4">
+                        创新林业碳汇交易模式，助力脱贫攻坚和乡村振兴战略实施
+                    </p>
+                    <a href="#" class="text-primary hover:underline">查看详情 <i class="fa fa-arrow-right ml-1"></i></a>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- 页脚 -->
+    <footer class="bg-dark text-white py-12">
+        <div class="container mx-auto px-4">
+            <div class="grid grid-cols-1 md:grid-cols-4 gap-8">
+                <div>
+                    <div class="flex items-center space-x-2 mb-4">
+                        <i class="fa fa-balance-scale text-primary text-2xl"></i>
+                        <span class="text-xl font-bold">司法生态修复碳汇管理平台</span>
+                    </div>
+                    <p class="text-gray-400">
+                        贵州省首个"司法+碳汇"一体化智能管理平台
+                    </p>
+                </div>
+                <div>
+                    <h3 class="text-lg font-bold mb-4">快速链接</h3>
+                    <ul class="space-y-2 text-gray-400">
+                        <li><a href="#home" class="hover:text-white transition-colors">首页</a></li>
+                        <li><a href="#intro" class="hover:text-white transition-colors">平台介绍</a></li>
+                        <li><a href="#features" class="hover:text-white transition-colors">三端功能</a></li>
+                        <li><a href="#data" class="hover:text-white transition-colors">数据公示</a></li>
+                    </ul>
+                </div>
+                <div>
+                    <h3 class="text-lg font-bold mb-4">主办单位</h3>
+                    <ul class="space-y-2 text-gray-400">
+                        <li>贵州省高级人民法院</li>
+                        <li>贵州省人民检察院</li>
+                        <li>贵州省林业局</li>
+                        <li>贵州省生态环境厅</li>
+                    </ul>
+                </div>
+                <div>
+                    <h3 class="text-lg font-bold mb-4">联系我们</h3>
+                    <ul class="space-y-2 text-gray-400">
+                        <li><i class="fa fa-phone mr-2"></i> 0851-12345678</li>
+                        <li><i class="fa fa-envelope mr-2"></i> contact@gzcarbon.gov.cn</li>
+                        <li><i class="fa fa-map-marker mr-2"></i> 贵州省贵阳市观山湖区</li>
+                    </ul>
+                </div>
+            </div>
+            <div class="border-t border-gray-700 mt-8 pt-8 text-center text-gray-400">
+                <p>© 2025 贵州省司法生态修复碳汇管理平台 版权所有 | 黔ICP备XXXXXXXX号</p>
+            </div>
+        </div>
+    </footer>
+
+    <!-- 登录模态框 -->
+    <div id="loginModal" class="fixed inset-0 bg-black/50 z-50 flex items-center justify-center opacity-0 invisible transition-all duration-300">
+        <div class="bg-white rounded-lg shadow-xl w-full max-w-md p-8 transform scale-95 transition-all duration-300" id="modalContent">
+            <div class="flex justify-between items-center mb-6">
+                <h3 class="text-2xl font-bold" id="modalTitle">司法人员登录</h3>
+                <button onclick="hideLoginModal()" class="text-gray-500 hover:text-dark">
+                    <i class="fa fa-times text-xl"></i>
+                </button>
+            </div>
+            <form id="loginForm">
+                <div class="mb-4">
+                    <label class="block text-gray-700 mb-2" for="username">用户名</label>
+                    <input type="text" id="username" class="w-full px-4 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-primary/50 focus:border-primary" placeholder="请输入用户名">
+                </div>
+                <div class="mb-6">
+                    <label class="block text-gray-700 mb-2" for="password">密码</label>
+                    <input type="password" id="password" class="w-full px-4 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-primary/50 focus:border-primary" placeholder="请输入密码">
+                </div>
+                <button type="button" onclick="login()" class="w-full bg-primary text-white py-3 rounded-md hover:bg-primary/90 transition-colors font-medium">
+                    登录
+                </button>
+            </form>
+        </div>
+    </div>
+
+    <!-- 法官端工作台页面 (默认隐藏) -->
+    <div id="judgeDashboard" class="hidden">
+        <!-- 顶部导航 -->
+        <nav class="bg-primary text-white py-3 px-4 flex items-center justify-between">
+            <div class="flex items-center space-x-2">
+                <i class="fa fa-balance-scale text-xl"></i>
+                <span class="text-lg font-bold">司法生态修复碳汇管理平台</span>
+            </div>
+            <div class="flex items-center space-x-4">
+                <span>欢迎您，张法官</span>
+                <button onclick="logout()" class="hover:text-gray-200">
+                    <i class="fa fa-sign-out"></i> 退出
+                </button>
+            </div>
+        </nav>
+
+        <div class="flex">
+            <!-- 左侧导航 -->
+            <div class="w-64 bg-white h-screen shadow-md">
+                <div class="py-4 px-6 border-b">
+                    <h3 class="font-bold">法官工作台</h3>
+                </div>
+                <ul class="py-2">
+                    <li>
+                        <a href="#" class="block py-3 px-6 bg-primary/10 text-primary border-l-4 border-primary">
+                            <i class="fa fa-home mr-2"></i> 工作台首页
+                        </a>
+                    </li>
+                    <li>
+                        <a href="#" class="block py-3 px-6 hover:bg-gray-50">
+                            <i class="fa fa-folder-open mr-2"></i> 案件管理
+                        </a>
+                    </li>
+                    <li>
+                        <a href="#" class="block py-3 px-6 hover:bg-gray-50">
+                            <i class="fa fa-calculator mr-2"></i> 生态损失评估
+                        </a>
+                    </li>
+                    <li>
+                        <a href="#" class="block py-3 px-6 hover:bg-gray-50">
+                            <i class="fa fa-list-alt mr-2"></i> 修复方案管理
+                        </a>
+                    </li>
+                    <li>
+                        <a href="#" class="block py-3 px-6 hover:bg-gray-50">
+                            <i class="fa fa-check-square-o mr-2"></i> 进度监督核验
+                        </a>
+                    </li>
+                    <li>
+                        <a href="#" class="block py-3 px-6 hover:bg-gray-50">
+                            <i class="fa fa-file-text-o mr-2"></i> 结案与司法确认
+                        </a>
+                    </li>
+                    <li>
+                        <a href="#" class="block py-3 px-6 hover:bg-gray-50">
+                            <i class="fa fa-cog mr-2"></i> 系统设置
+                        </a>
+                    </li>
+                </ul>
+            </div>
+
+            <!-- 主内容区 -->
+            <div class="flex-1 p-6 bg-gray-50 overflow-y-auto h-screen">
+                <h2 class="text-2xl font-bold mb-6">工作台首页</h2>
+
+                <!-- 待办事项 -->
+                <div class="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
+                    <div class="bg-white rounded-lg shadow-md p-6 card-hover">
+                        <div class="flex justify-between items-center mb-4">
+                            <h3 class="text-lg font-bold">待审核案件</h3>
+                            <span class="bg-primary/10 text-primary px-2 py-1 rounded-full text-sm">12</span>
+                        </div>
+                        <p class="text-gray-600 mb-4">需要您审核的新案件</p>
+                        <a href="#" class="text-primary hover:underline">查看全部 <i class="fa fa-arrow-right ml-1"></i></a>
+                    </div>
+                    <div class="bg-white rounded-lg shadow-md p-6 card-hover">
+                        <div class="flex justify-between items-center mb-4">
+                            <h3 class="text-lg font-bold">待核验修复</h3>
+                            <span class="bg-warning/10 text-warning px-2 py-1 rounded-full text-sm">8</span>
+                        </div>
+                        <p class="text-gray-600 mb-4">等待您核验的修复申请</p>
+                        <a href="#" class="text-primary hover:underline">查看全部 <i class="fa fa-arrow-right ml-1"></i></a>
+                    </div>
+                    <div class="bg-white rounded-lg shadow-md p-6 card-hover">
+                        <div class="flex justify-between items-center mb-4">
+                            <h3 class="text-lg font-bold">逾期未修复</h3>
+                            <span class="bg-danger/10 text-danger px-2 py-1 rounded-full text-sm">3</span>
+                        </div>
+                        <p class="text-gray-600 mb-4">超过修复期限的案件</p>
+                        <a href="#" class="text-primary hover:underline">查看全部 <i class="fa fa-arrow-right ml-1"></i></a>
+                    </div>
+                </div>
+
+                <!-- 数据概览 -->
+                <div class="bg-white rounded-lg shadow-md p-6 mb-8">
+                    <h3 class="text-lg font-bold mb-4">本月数据概览</h3>
+                    <div class="grid grid-cols-2 md:grid-cols-4 gap-4">
+                        <div class="text-center">
+                            <div class="text-2xl font-bold text-primary">24</div>
+                            <div class="text-gray-600">新增案件</div>
+                        </div>
+                        <div class="text-center">
+                            <div class="text-2xl font-bold text-success">18</div>
+                            <div class="text-gray-600">修复完成</div>
+                        </div>
+                        <div class="text-center">
+                            <div class="text-2xl font-bold text-primary">2,345</div>
+                            <div class="text-gray-600">碳汇认购量(t)</div>
+                        </div>
+                        <div class="text-center">
+                            <div class="text-2xl font-bold text-success">75%</div>
+                            <div class="text-gray-600">修复完成率</div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- 案件列表 -->
+                <div class="bg-white rounded-lg shadow-md p-6">
+                    <div class="flex justify-between items-center mb-4">
+                        <h3 class="text-lg font-bold">最新案件</h3>
+                        <button class="bg-primary text-white px-4 py-2 rounded-md hover:bg-primary/90 transition-colors">
+                            <i class="fa fa-plus mr-2"></i> 新增案件
+                        </button>
+                    </div>
+                    <div class="overflow-x-auto">
+                        <table class="w-full">
+                            <thead>
+                                <tr class="border-b">
+                                    <th class="text-left py-3 px-4">案号</th>
+                                    <th class="text-left py-3 px-4">当事人</th>
+                                    <th class="text-left py-3 px-4">案由</th>
+                                    <th class="text-left py-3 px-4">立案时间</th>
+                                    <th class="text-left py-3 px-4">状态</th>
+                                    <th class="text-left py-3 px-4">操作</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <tr class="border-b hover:bg-gray-50">
+                                    <td class="py-3 px-4">(2025)黔01民初123号</td>
+                                    <td class="py-3 px-4">李某某</td>
+                                    <td class="py-3 px-4">毁林</td>
+                                    <td class="py-3 px-4">2025-05-10</td>
+                                    <td class="py-3 px-4"><span class="bg-warning/10 text-warning px-2 py-1 rounded-full text-xs">修复中</span></td>
+                                    <td class="py-3 px-4">
+                                        <a href="#" class="text-primary hover:underline mr-2">查看</a>
+                                        <a href="#" class="text-primary hover:underline">编辑</a>
+                                    </td>
+                                </tr>
+                                <tr class="border-b hover:bg-gray-50">
+                                    <td class="py-3 px-4">(2025)黔01民初122号</td>
+                                    <td class="py-3 px-4">王某某</td>
+                                    <td class="py-3 px-4">非法捕捞</td>
+                                    <td class="py-3 px-4">2025-05-08</td>
+                                    <td class="py-3 px-4"><span class="bg-success/10 text-success px-2 py-1 rounded-full text-xs">已完成</span></td>
+                                    <td class="py-3 px-4">
+                                        <a href="#" class="text-primary hover:underline mr-2">查看</a>
+                                        <a href="#" class="text-primary hover:underline">编辑</a>
+                                    </td>
+                                </tr>
+                                <tr class="border-b hover:bg-gray-50">
+                                    <td class="py-3 px-4">(2025)黔01民初121号</td>
+                                    <td class="py-3 px-4">张某某</td>
+                                    <td class="py-3 px-4">非法占地</td>
+                                    <td class="py-3 px-4">2025-05-05</td>
+                                    <td class="py-3 px-4"><span class="bg-danger/10 text-danger px-2 py-1 rounded-full text-xs">逾期</span></td>
+                                    <td class="py-3 px-4">
+                                        <a href="#" class="text-primary hover:underline mr-2">查看</a>
+                                        <a href="#" class="text-primary hover:underline">编辑</a>
+                                    </td>
+                                </tr>
+                                <tr class="hover:bg-gray-50">
+                                    <td class="py-3 px-4">(2025)黔01民初120号</td>
+                                    <td class="py-3 px-4">刘某某</td>
+                                    <td class="py-3 px-4">水污染</td>
+                                    <td class="py-3 px-4">2025-05-01</td>
+                                    <td class="py-3 px-4"><span class="bg-primary/10 text-primary px-2 py-1 rounded-full text-xs">待审核</span></td>
+                                    <td class="py-3 px-4">
+                                        <a href="#" class="text-primary hover:underline mr-2">查看</a>
+                                        <a href="#" class="text-primary hover:underline">编辑</a>
+                                    </td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // 导航栏滚动效果
+        window.addEventListener('scroll', function() {
+            const navbar = document.getElementById('navbar');
+            if (window.scrollY > 50) {
+                navbar.classList.add('nav-sticky', 'shadow-md');
+            } else {
+                navbar.classList.remove('nav-sticky', 'shadow-md');
+            }
+        });
+
+        // 数字动画
+        function animateNumber(elementId, target, duration = 2000) {
+            const element = document.getElementById(elementId);
+            if (!element) return;
+            
+            const start = 0;
+            const increment = target / (duration / 16);
+            let current = start;
+            const isPercentage = elementId.includes('rate') || elementId.includes('percentage');
+
+            const timer = setInterval(() => {
+                current += increment;
+                if (current >= target) {
+                    clearInterval(timer);
+                    current = target;
+                }
+
+                if (isPercentage) {
+                    element.textContent = current.toFixed(1) + '%';
+                } else {
+                    element.textContent = Math.floor(current).toLocaleString();
+                }
+            }, 16);
+        }
+
+        // 页面加载完成后执行动画
+        window.addEventListener('load', function() {
+            animateNumber('case-count', 128);
+            animateNumber('area-count', 3562);
+            animateNumber('carbon-count', 12458);
+            animateNumber('survival-rate', 96.8);
+            
+            // 数据公示区域的数字动画
+            animateNumber('data-case-count', 128);
+            animateNumber('data-area-count', 3562);
+            animateNumber('data-carbon-count', 12458);
+            animateNumber('data-completion-rate', 94.6);
+
+            // 初始化图表
+            initCharts();
+        });
+
+        // 图表数据
+        const chartData = {
+            month: {
+                labels: ['1月', '2月', '3月', '4月', '5月', '6月', '7月', '8月', '9月', '10月', '11月', '12月'],
+                data: [65, 72, 78, 82, 75, 88, 92, 85, 90, 94, 91, 94.6]
+            },
+            quarter: {
+                labels: ['Q1', 'Q2', 'Q3', 'Q4'],
+                data: [72, 85, 91, 94.6]
+            },
+            year: {
+                labels: ['2021', '2022', '2023', '2024', '2025'],
+                data: [60, 75, 82, 89, 94.6]
+            }
+        };
+
+        let completionRateChart = null;
+
+        // 切换图表周期
+        function switchChartPeriod(period) {
+            // 更新按钮样式
+            document.querySelectorAll('[id^="btn-"]').forEach(btn => {
+                btn.classList.remove('bg-primary', 'text-white');
+                btn.classList.add('bg-gray-100', 'text-gray-600', 'hover:bg-gray-200');
+            });
+            document.getElementById('btn-' + period).classList.remove('bg-gray-100', 'text-gray-600', 'hover:bg-gray-200');
+            document.getElementById('btn-' + period).classList.add('bg-primary', 'text-white');
+
+            // 更新图表数据
+            if (completionRateChart) {
+                completionRateChart.data.labels = chartData[period].labels;
+                completionRateChart.data.datasets[0].data = chartData[period].data;
+                completionRateChart.update();
+            }
+        }
+
+        // 初始化图表
+        function initCharts() {
+            // 案件类型分布饼图
+            const caseTypeCtx = document.getElementById('caseTypeChart').getContext('2d');
+            new Chart(caseTypeCtx, {
+                type: 'doughnut',
+                data: {
+                    labels: ['毁林', '非法捕捞', '非法占地', '水污染', '其他'],
+                    datasets: [{
+                        data: [45, 25, 15, 10, 5],
+                        backgroundColor: [
+                            '#165DFF',
+                            '#00B42A',
+                            '#FF7D00',
+                            '#F53F3F',
+                            '#86909C'
+                        ],
+                        borderWidth: 0,
+                        hoverOffset: 10
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: true,
+                    plugins: {
+                        legend: {
+                            position: 'bottom',
+                            labels: {
+                                padding: 15,
+                                usePointStyle: true,
+                                font: {
+                                    size: 12
+                                }
+                            }
+                        },
+                        tooltip: {
+                            callbacks: {
+                                label: function(context) {
+                                    let label = context.label || '';
+                                    if (label) {
+                                        label += ': ';
+                                    }
+                                    label += context.raw + '件 (' + Math.round(context.raw / 128 * 100) + '%)';
+                                    return label;
+                                }
+                            }
+                        }
+                    }
+                }
+            });
+
+            // 修复完成率趋势折线图
+            const completionRateCtx = document.getElementById('completionRateChart').getContext('2d');
+            completionRateChart = new Chart(completionRateCtx, {
+                type: 'line',
+                data: {
+                    labels: chartData.month.labels,
+                    datasets: [{
+                        label: '修复完成率(%)',
+                        data: chartData.month.data,
+                        borderColor: '#165DFF',
+                        backgroundColor: function(context) {
+                            const chart = context.chart;
+                            const {ctx, chartArea} = chart;
+                            if (!chartArea) {
+                                return null;
+                            }
+                            const gradient = ctx.createLinearGradient(0, chartArea.top, 0, chartArea.bottom);
+                            gradient.addColorStop(0, 'rgba(22, 93, 255, 0.3)');
+                            gradient.addColorStop(1, 'rgba(22, 93, 255, 0.05)');
+                            return gradient;
+                        },
+                        fill: true,
+                        tension: 0.4,
+                        pointRadius: 5,
+                        pointHoverRadius: 8,
+                        pointBackgroundColor: '#165DFF',
+                        pointBorderColor: '#fff',
+                        pointBorderWidth: 2
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: true,
+                    interaction: {
+                        intersect: false,
+                        mode: 'index'
+                    },
+                    scales: {
+                        y: {
+                            beginAtZero: false,
+                            min: 50,
+                            max: 100,
+                            grid: {
+                                color: 'rgba(0, 0, 0, 0.05)'
+                            },
+                            ticks: {
+                                callback: function(value) {
+                                    return value + '%';
+                                },
+                                font: {
+                                    size: 11
+                                }
+                            }
+                        },
+                        x: {
+                            grid: {
+                                display: false
+                            },
+                            ticks: {
+                                font: {
+                                    size: 11
+                                }
+                            }
+                        }
+                    },
+                    plugins: {
+                        legend: {
+                            display: false
+                        },
+                        tooltip: {
+                            backgroundColor: '#1D2129',
+                            titleColor: '#fff',
+                            bodyColor: '#fff',
+                            padding: 12,
+                            cornerRadius: 8,
+                            callbacks: {
+                                label: function(context) {
+                                    return '修复完成率: ' + context.raw + '%';
+                                }
+                            }
+                        }
+                    }
+                }
+            });
+        }
+
+        // 登录模态框
+        let currentRole = 'judge';
+
+        function showLoginModal(role) {
+            currentRole = role;
+            const modal = document.getElementById('loginModal');
+            const modalTitle = document.getElementById('modalTitle');
+
+            switch(role) {
+                case 'party':
+                    modalTitle.textContent = '当事人登录';
+                    break;
+                case 'judge':
+                    modalTitle.textContent = '司法人员登录';
+                    break;
+                case 'admin':
+                    modalTitle.textContent = '管理部门登录';
+                    break;
+            }
+
+            modal.classList.remove('opacity-0', 'invisible');
+            document.getElementById('modalContent').classList.remove('scale-95');
+            document.getElementById('modalContent').classList.add('scale-100');
+        }
+
+        function hideLoginModal() {
+            const modal = document.getElementById('loginModal');
+            document.getElementById('modalContent').classList.remove('scale-100');
+            document.getElementById('modalContent').classList.add('scale-95');
+            setTimeout(() => {
+                modal.classList.add('opacity-0', 'invisible');
+            }, 300);
+        }
+
+        // 登录功能
+        function login() {
+            // 简单模拟登录
+            const username = document.getElementById('username').value;
+            const password = document.getElementById('password').value;
+
+            if (username && password) {
+                hideLoginModal();
+
+                // 根据角色跳转到对应工作台
+                if (currentRole === 'judge') {
+                    document.getElementById('home').parentElement.style.display = 'none';
+                    document.getElementById('judgeDashboard').classList.remove('hidden');
+                } else {
+                    alert('登录成功！演示版本仅展示法官端工作台');
+                }
+            } else {
+                alert('请输入用户名和密码');
+            }
+        }
+
+        // 退出登录
+        function logout() {
+            document.getElementById('judgeDashboard').classList.add('hidden');
+            document.getElementById('home').parentElement.style.display = 'block';
+        }
+
+        // 点击模态框外部关闭
+        document.getElementById('loginModal').addEventListener('click', function(e) {
+            if (e.target === this) {
+                hideLoginModal();
+            }
+        });
+    </script>
+</body>
+</html>
