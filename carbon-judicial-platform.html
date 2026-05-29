@@ -1,0 +1,1191 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
+    <title>碳法——生态积分司法修复智能服务平台</title>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700;900&family=Noto+Sans+SC:wght@300;400;500;700&display=swap');
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            overflow: hidden;
+            background: linear-gradient(135deg, #0a0e17 0%, #0d1f1a 50%, #0a0e17 100%);
+            font-family: 'Noto Sans SC', sans-serif;
+            color: #fff;
+            -webkit-tap-highlight-color: transparent;
+            -webkit-touch-callout: none;
+            -webkit-user-select: none;
+            user-select: none;
+            touch-action: pan-x pan-y pinch-zoom;
+        }
+
+        #canvas-container {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            z-index: 1;
+            touch-action: none;
+        }
+
+        #canvas-container canvas {
+            touch-action: none;
+        }
+
+        .overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            pointer-events: none;
+            z-index: 10;
+        }
+
+        .header {
+            position: fixed;
+            top: 30px;
+            left: 50%;
+            transform: translateX(-50%);
+            text-align: center;
+            z-index: 100;
+            pointer-events: none;
+        }
+
+        .title {
+            font-family: 'Orbitron', 'Noto Sans SC', sans-serif;
+            font-size: 2.8rem;
+            font-weight: 900;
+            background: linear-gradient(135deg, #00ff88 0%, #00d4ff 50%, #ffd700 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+            text-shadow: 0 0 40px rgba(0, 255, 136, 0.5);
+            letter-spacing: 0.15em;
+            animation: titleGlow 3s ease-in-out infinite;
+        }
+
+        .subtitle {
+            font-size: 1rem;
+            color: rgba(255, 255, 255, 0.7);
+            margin-top: 10px;
+            letter-spacing: 0.3em;
+            font-weight: 300;
+        }
+
+        @keyframes titleGlow {
+            0%, 100% { filter: brightness(1) drop-shadow(0 0 20px rgba(0, 255, 136, 0.3)); }
+            50% { filter: brightness(1.2) drop-shadow(0 0 40px rgba(0, 212, 255, 0.5)); }
+        }
+
+        .data-panel {
+            position: fixed;
+            bottom: 30px;
+            right: 30px;
+            background: rgba(10, 20, 30, 0.6);
+            backdrop-filter: blur(20px);
+            -webkit-backdrop-filter: blur(20px);
+            border: 1px solid rgba(0, 255, 136, 0.3);
+            border-radius: 16px;
+            padding: 25px 30px;
+            z-index: 100;
+            pointer-events: auto;
+            min-width: 280px;
+            box-shadow: 
+                0 0 30px rgba(0, 255, 136, 0.1),
+                inset 0 0 30px rgba(0, 255, 136, 0.05);
+            animation: panelBorder 4s linear infinite;
+        }
+
+        @keyframes panelBorder {
+            0% { border-color: rgba(0, 255, 136, 0.3); }
+            33% { border-color: rgba(0, 212, 255, 0.3); }
+            66% { border-color: rgba(255, 215, 0, 0.3); }
+            100% { border-color: rgba(0, 255, 136, 0.3); }
+        }
+
+        .panel-title {
+            font-size: 0.85rem;
+            color: rgba(255, 255, 255, 0.6);
+            margin-bottom: 15px;
+            letter-spacing: 0.2em;
+            text-transform: uppercase;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+            padding-bottom: 10px;
+        }
+
+        .data-item {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin: 12px 0;
+            transition: all 0.3s ease;
+        }
+
+        .data-item:hover {
+            transform: translateX(5px);
+        }
+
+        .data-label {
+            font-size: 0.85rem;
+            color: rgba(255, 255, 255, 0.7);
+        }
+
+        .data-value {
+            font-family: 'Orbitron', monospace;
+            font-size: 1.2rem;
+            font-weight: 700;
+            background: linear-gradient(90deg, #00ff88, #00d4ff);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+
+        .data-unit {
+            font-size: 0.7rem;
+            color: rgba(255, 255, 255, 0.4);
+            margin-left: 3px;
+        }
+
+        .footer {
+            position: fixed;
+            bottom: 20px;
+            left: 50%;
+            transform: translateX(-50%);
+            text-align: center;
+            z-index: 100;
+            pointer-events: none;
+        }
+
+        .footer-text {
+            font-size: 0.8rem;
+            color: rgba(255, 255, 255, 0.5);
+            letter-spacing: 0.15em;
+        }
+
+        .footer-slogan {
+            font-size: 1rem;
+            color: rgba(0, 255, 136, 0.8);
+            margin-top: 5px;
+            letter-spacing: 0.2em;
+            font-weight: 500;
+        }
+
+        .flow-label {
+            background: rgba(10, 20, 35, 0.7);
+            backdrop-filter: blur(10px);
+            -webkit-backdrop-filter: blur(10px);
+            border: 1px solid rgba(0, 255, 136, 0.4);
+            border-radius: 8px;
+            padding: 8px 14px;
+            font-size: 0.75rem;
+            color: #fff;
+            white-space: nowrap;
+            pointer-events: auto;
+            transition: all 0.3s ease;
+            box-shadow: 0 0 20px rgba(0, 255, 136, 0.2);
+        }
+
+        .flow-label.active {
+            border-color: #00ff88;
+            box-shadow: 0 0 30px rgba(0, 255, 136, 0.5);
+            transform: scale(1.1);
+        }
+
+        .flow-label .step-num {
+            display: block;
+            font-size: 0.6rem;
+            color: rgba(255, 255, 255, 0.4);
+            margin-bottom: 2px;
+        }
+
+        .end-label {
+            background: rgba(10, 20, 35, 0.6);
+            backdrop-filter: blur(10px);
+            border-radius: 6px;
+            padding: 6px 12px;
+            font-size: 0.7rem;
+            color: #fff;
+            pointer-events: auto;
+            border: 1px solid rgba(255, 255, 255, 0.2);
+        }
+
+        .center-label {
+            background: transparent;
+            font-family: 'Orbitron', sans-serif;
+            font-size: 2rem;
+            font-weight: 900;
+            color: #fff;
+            text-shadow: 0 0 30px rgba(0, 255, 136, 0.8);
+            pointer-events: none;
+        }
+
+        .loading {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: #0a0e17;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            z-index: 1000;
+            transition: opacity 1s ease;
+        }
+
+        .loading.hidden {
+            opacity: 0;
+            pointer-events: none;
+        }
+
+        .loading-text {
+            font-family: 'Orbitron', sans-serif;
+            font-size: 1.5rem;
+            color: #00ff88;
+            animation: loadingPulse 1.5s ease-in-out infinite;
+        }
+
+        @keyframes loadingPulse {
+            0%, 100% { opacity: 0.5; }
+            50% { opacity: 1; }
+        }
+
+        .scan-line {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 2px;
+            background: linear-gradient(90deg, transparent, rgba(0, 255, 136, 0.5), transparent);
+            animation: scanMove 3s linear infinite;
+            z-index: 5;
+            pointer-events: none;
+        }
+
+        @keyframes scanMove {
+            0% { top: -2px; }
+            100% { top: 100%; }
+        }
+
+        .corner-decoration {
+            position: fixed;
+            width: 100px;
+            height: 100px;
+            border: 2px solid rgba(0, 255, 136, 0.3);
+            pointer-events: none;
+            z-index: 50;
+        }
+
+        .corner-decoration.top-left {
+            top: 20px;
+            left: 20px;
+            border-right: none;
+            border-bottom: none;
+        }
+
+        .corner-decoration.top-right {
+            top: 20px;
+            right: 20px;
+            border-left: none;
+            border-bottom: none;
+        }
+
+        .corner-decoration.bottom-left {
+            bottom: 20px;
+            left: 20px;
+            border-right: none;
+            border-top: none;
+        }
+
+        .corner-decoration.bottom-right {
+            bottom: 20px;
+            right: 20px;
+            border-left: none;
+            border-top: none;
+        }
+
+        @media (max-width: 768px) {
+            .header {
+                top: 12px;
+            }
+            .title {
+                font-size: 1.6rem;
+                letter-spacing: 0.08em;
+            }
+            .subtitle {
+                font-size: 0.7rem;
+                margin-top: 4px;
+                letter-spacing: 0.15em;
+            }
+            .data-panel {
+                bottom: 10px;
+                right: 8px;
+                padding: 12px 14px;
+                min-width: auto;
+                width: 185px;
+                border-radius: 12px;
+            }
+            .panel-title {
+                font-size: 0.7rem;
+                margin-bottom: 8px;
+                padding-bottom: 6px;
+            }
+            .data-item {
+                margin: 6px 0;
+            }
+            .data-label {
+                font-size: 0.65rem;
+            }
+            .data-value {
+                font-size: 0.85rem;
+            }
+            .data-unit {
+                font-size: 0.6rem;
+            }
+            .flow-label {
+                padding: 4px 8px;
+                font-size: 0.55rem;
+                border-radius: 6px;
+            }
+            .flow-label .step-num {
+                font-size: 0.45rem;
+            }
+            .flow-label.active {
+                transform: scale(1.05);
+            }
+            .end-label {
+                padding: 3px 6px;
+                font-size: 0.52rem;
+                border-radius: 4px;
+            }
+            .center-label {
+                font-size: 1.2rem;
+            }
+            .footer {
+                bottom: 6px;
+            }
+            .footer-text {
+                font-size: 0.6rem;
+            }
+            .footer-slogan {
+                font-size: 0.7rem;
+                margin-top: 2px;
+            }
+            .corner-decoration {
+                width: 40px;
+                height: 40px;
+            }
+            .corner-decoration.top-left {
+                top: 8px;
+                left: 8px;
+            }
+            .corner-decoration.top-right {
+                top: 8px;
+                right: 8px;
+            }
+            .corner-decoration.bottom-left {
+                bottom: 8px;
+                left: 8px;
+            }
+            .corner-decoration.bottom-right {
+                bottom: 8px;
+                right: 8px;
+            }
+            .scan-line {
+                animation-duration: 2s;
+            }
+            .loading-text {
+                font-size: 1rem;
+            }
+        }
+
+        @media (max-width: 400px) {
+            .title {
+                font-size: 1.3rem;
+            }
+            .subtitle {
+                font-size: 0.6rem;
+            }
+            .data-panel {
+                width: 155px;
+                padding: 10px 12px;
+                border-radius: 10px;
+            }
+            .data-label {
+                font-size: 0.58rem;
+            }
+            .data-value {
+                font-size: 0.72rem;
+            }
+            .flow-label {
+                padding: 3px 6px;
+                font-size: 0.5rem;
+            }
+            .flow-label .step-num {
+                font-size: 0.4rem;
+            }
+            .end-label {
+                font-size: 0.45rem;
+                padding: 2px 5px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="loading" id="loading">
+        <div class="loading-text">INITIALIZING...</div>
+    </div>
+
+    <div id="canvas-container"></div>
+
+    <div class="overlay">
+        <div class="scan-line"></div>
+        <div class="corner-decoration top-left"></div>
+        <div class="corner-decoration top-right"></div>
+        <div class="corner-decoration bottom-left"></div>
+        <div class="corner-decoration bottom-right"></div>
+    </div>
+
+    <div class="header">
+        <h1 class="title">碳法</h1>
+        <p class="subtitle">生态积分司法修复智能服务平台</p>
+    </div>
+
+    <div class="data-panel">
+        <div class="panel-title">实时数据监控</div>
+        <div class="data-item">
+            <span class="data-label">监管案件数</span>
+            <span class="data-value"><span id="cases">0</span><span class="data-unit">件</span></span>
+        </div>
+        <div class="data-item">
+            <span class="data-label">碳汇核证量</span>
+            <span class="data-value"><span id="carbon">0</span><span class="data-unit">tCO₂e</span></span>
+        </div>
+        <div class="data-item">
+            <span class="data-label">生态积分发放</span>
+            <span class="data-value"><span id="credits">0</span><span class="data-unit">积分</span></span>
+        </div>
+        <div class="data-item">
+            <span class="data-label">修复完成率</span>
+            <span class="data-value"><span id="completion">0</span><span class="data-unit">%</span></span>
+        </div>
+        <div class="data-item">
+            <span class="data-label">司法确认案件</span>
+            <span class="data-value"><span id="judicial">0</span><span class="data-unit">件</span></span>
+        </div>
+    </div>
+
+    <div class="footer">
+        <div class="footer-text">公益非营利</div>
+        <div class="footer-slogan">以司法之力守护绿水青山</div>
+    </div>
+
+    <script type="importmap">
+    {
+        "imports": {
+            "three": "https://unpkg.com/three@0.160.0/build/three.module.js",
+            "three/addons/": "https://unpkg.com/three@0.160.0/examples/jsm/"
+        }
+    }
+    </script>
+
+    <script type="module">
+        import * as THREE from 'three';
+        import { OrbitControls } from 'three/addons/controls/OrbitControls.js';
+        import { EffectComposer } from 'three/addons/postprocessing/EffectComposer.js';
+        import { RenderPass } from 'three/addons/postprocessing/RenderPass.js';
+        import { UnrealBloomPass } from 'three/addons/postprocessing/UnrealBloomPass.js';
+        import { CSS2DRenderer, CSS2DObject } from 'three/addons/renderers/CSS2DRenderer.js';
+
+        let scene, camera, renderer, composer, controls, labelRenderer;
+        let clock = new THREE.Clock();
+        let animationId;
+        let cameraBreathPhase = 0;
+        let flowPhase = 0;
+
+        const isMobile = /Android|iPhone|iPad|iPod|webOS/i.test(navigator.userAgent) || window.innerWidth < 768;
+        const isSmallScreen = window.innerWidth <= 400;
+        const MOBILE_PARTICLE_SCALE = isSmallScreen ? 0.35 : (isMobile ? 0.55 : 1);
+
+        const flowSteps = [
+            { name: '案件绑定', position: new THREE.Vector3(6, 2, 0) },
+            { name: '修复派单', position: new THREE.Vector3(4.24, 2, 4.24) },
+            { name: '履约打卡', position: new THREE.Vector3(0, 2, 6) },
+            { name: 'AI核验', position: new THREE.Vector3(-4.24, 2, 4.24) },
+            { name: '碳汇核算', position: new THREE.Vector3(-6, 2, 0) },
+            { name: '积分发放', position: new THREE.Vector3(-4.24, 2, -4.24) },
+            { name: '司法确认', position: new THREE.Vector3(0, 2, -6) },
+            { name: '结案归档', position: new THREE.Vector3(4.24, 2, -4.24) }
+        ];
+
+        const flowLabels = [];
+        const endLabels = [];
+
+        const dataValues = {
+            cases: 1247,
+            carbon: 8934,
+            credits: 156789,
+            completion: 87.5,
+            judicial: 342
+        };
+
+        class ParticleSystem {
+            constructor(count, color, size = 1) {
+                this.count = count;
+                this.color = color;
+                this.size = size;
+                this.geometry = new THREE.BufferGeometry();
+                this.positions = new Float32Array(count * 3);
+                this.velocities = new Float32Array(count * 3);
+                this.phases = new Float32Array(count);
+                this.speeds = new Float32Array(count);
+                
+                for (let i = 0; i < count; i++) {
+                    this.positions[i * 3] = 0;
+                    this.positions[i * 3 + 1] = 0;
+                    this.positions[i * 3 + 2] = 0;
+                    this.velocities[i * 3] = (Math.random() - 0.5) * 0.02;
+                    this.velocities[i * 3 + 1] = (Math.random() - 0.5) * 0.02;
+                    this.velocities[i * 3 + 2] = (Math.random() - 0.5) * 0.02;
+                    this.phases[i] = Math.random() * Math.PI * 2;
+                    this.speeds[i] = 0.5 + Math.random() * 1.5;
+                }
+                
+                this.geometry.setAttribute('position', new THREE.BufferAttribute(this.positions, 3));
+                
+                this.material = new THREE.PointsMaterial({
+                    color: color,
+                    size: size,
+                    transparent: true,
+                    opacity: 0.8,
+                    blending: THREE.AdditiveBlending,
+                    depthWrite: false,
+                    sizeAttenuation: true
+                });
+                
+                this.points = new THREE.Points(this.geometry, this.material);
+            }
+            
+            update(time) {
+                const positions = this.geometry.attributes.position.array;
+                for (let i = 0; i < this.count; i++) {
+                    const idx = i * 3;
+                    positions[idx] += this.velocities[idx] * this.speeds[i];
+                    positions[idx + 1] += this.velocities[idx + 1] * this.speeds[i];
+                    positions[idx + 2] += this.velocities[idx + 2] * this.speeds[i];
+                    
+                    const dist = Math.sqrt(
+                        positions[idx] ** 2 + 
+                        positions[idx + 1] ** 2 + 
+                        positions[idx + 2] ** 2
+                    );
+                    
+                    if (dist > 10) {
+                        positions[idx] *= 0.95;
+                        positions[idx + 1] *= 0.95;
+                        positions[idx + 2] *= 0.95;
+                    }
+                }
+                this.geometry.attributes.position.needsUpdate = true;
+            }
+        }
+
+        let centralParticles, leftVortex, rightVortex, flowParticles, centerSphere;
+        let frontEndParticles, midEndParticles, backEndParticles;
+        let starField, nebulaParticles;
+        let gridFloor;
+
+        function init() {
+            scene = new THREE.Scene();
+            scene.fog = new THREE.FogExp2(0x0a0e17, 0.015);
+            
+            camera = new THREE.PerspectiveCamera(
+                60,
+                window.innerWidth / window.innerHeight,
+                0.1,
+                1000
+            );
+            camera.position.set(0, isMobile ? 7 : 8, isMobile ? 22 : 18);
+            
+            renderer = new THREE.WebGLRenderer({
+                antialias: true,
+                alpha: true,
+                powerPreference: isMobile ? 'default' : 'high-performance'
+            });
+            renderer.setSize(window.innerWidth, window.innerHeight);
+            renderer.setPixelRatio(Math.min(window.devicePixelRatio, isMobile ? 1.5 : 2));
+            renderer.toneMapping = THREE.ACESFilmicToneMapping;
+            renderer.toneMappingExposure = 1.2;
+            document.getElementById('canvas-container').appendChild(renderer.domElement);
+            
+            labelRenderer = new CSS2DRenderer();
+            labelRenderer.setSize(window.innerWidth, window.innerHeight);
+            labelRenderer.domElement.style.position = 'absolute';
+            labelRenderer.domElement.style.top = '0';
+            labelRenderer.domElement.style.pointerEvents = 'none';
+            document.getElementById('canvas-container').appendChild(labelRenderer.domElement);
+            
+            const ambientLight = new THREE.AmbientLight(0x404040, 0.5);
+            scene.add(ambientLight);
+            
+            const pointLight1 = new THREE.PointLight(0x00ff88, 2, 50);
+            pointLight1.position.set(5, 5, 5);
+            scene.add(pointLight1);
+            
+            const pointLight2 = new THREE.PointLight(0x00d4ff, 2, 50);
+            pointLight2.position.set(-5, 5, -5);
+            scene.add(pointLight2);
+            
+            const pointLight3 = new THREE.PointLight(0xffd700, 1.5, 40);
+            pointLight3.position.set(0, 8, 0);
+            scene.add(pointLight3);
+            
+            createCentralVisualization();
+            createFlowSystem();
+            createThreeEndVisualization();
+            createEnvironment();
+            createFlowLabels();
+            createEndLabels();
+            
+            composer = new EffectComposer(renderer);
+            const renderPass = new RenderPass(scene, camera);
+            composer.addPass(renderPass);
+            
+            const bloomRes = isMobile ? 0.65 : 0.85;
+            const bloomPass = new UnrealBloomPass(
+                new THREE.Vector2(window.innerWidth, window.innerHeight),
+                1.5,
+                0.4,
+                bloomRes
+            );
+            bloomPass.threshold = 0.1;
+            bloomPass.strength = isMobile ? 1.0 : 2;
+            bloomPass.radius = 0.5;
+            composer.addPass(bloomPass);
+            
+            controls = new OrbitControls(camera, renderer.domElement);
+            controls.enableDamping = true;
+            controls.dampingFactor = 0.05;
+            controls.minDistance = isMobile ? 14 : 10;
+            controls.maxDistance = isMobile ? 50 : 40;
+            controls.autoRotate = true;
+            controls.autoRotateSpeed = isMobile ? 0.35 : 0.5;
+            controls.maxPolarAngle = Math.PI / 2;
+            controls.enablePan = false;
+            if (isMobile) {
+                controls.touches = {
+                    ONE: THREE.TOUCH.ROTATE,
+                    TWO: THREE.TOUCH.DOLLY
+                };
+            }
+            
+            window.addEventListener('resize', onWindowResize);
+            
+            document.getElementById('loading').classList.add('hidden');
+            
+            animate();
+            startDataUpdate();
+        }
+
+        function createCentralVisualization() {
+            const centerGroup = new THREE.Group();
+            
+            const arcGeometry = new THREE.TorusGeometry(4, 0.15, 16, 100, Math.PI);
+            const arcMaterial = new THREE.MeshBasicMaterial({
+                color: 0x00ff88,
+                transparent: true,
+                opacity: 0.8,
+                blending: THREE.AdditiveBlending
+            });
+            const arc = new THREE.Mesh(arcGeometry, arcMaterial);
+            arc.rotation.x = Math.PI / 2;
+            arc.rotation.z = Math.PI / 2;
+            centerGroup.add(arc);
+            
+            const innerArcGeometry = new THREE.TorusGeometry(3, 0.08, 16, 100, Math.PI);
+            const innerArcMaterial = new THREE.MeshBasicMaterial({
+                color: 0x00d4ff,
+                transparent: true,
+                opacity: 0.6,
+                blending: THREE.AdditiveBlending
+            });
+            const innerArc = new THREE.Mesh(innerArcGeometry, innerArcMaterial);
+            innerArc.rotation.x = Math.PI / 2;
+            innerArc.rotation.z = Math.PI / 2;
+            centerGroup.add(innerArc);
+            
+            leftVortex = new ParticleSystem(Math.floor(500 * MOBILE_PARTICLE_SCALE), 0x00ff88, isMobile ? 0.15 : 0.12);
+            leftVortex.points.position.x = -4;
+            scene.add(leftVortex.points);
+            
+            rightVortex = new ParticleSystem(Math.floor(500 * MOBILE_PARTICLE_SCALE), 0xffd700, isMobile ? 0.15 : 0.12);
+            rightVortex.points.position.x = 4;
+            scene.add(rightVortex.points);
+            
+            const sphereGeometry = new THREE.SphereGeometry(1.5, 32, 32);
+            const sphereMaterial = new THREE.MeshBasicMaterial({
+                color: 0x00ff88,
+                transparent: true,
+                opacity: 0.15,
+                blending: THREE.AdditiveBlending,
+                side: THREE.DoubleSide
+            });
+            centerSphere = new THREE.Mesh(sphereGeometry, sphereMaterial);
+            centerGroup.add(centerSphere);
+            
+            const innerSphereGeometry = new THREE.SphereGeometry(1.2, 32, 32);
+            const innerSphereMaterial = new THREE.MeshBasicMaterial({
+                color: 0x00d4ff,
+                transparent: true,
+                opacity: 0.2,
+                blending: THREE.AdditiveBlending
+            });
+            const innerSphere = new THREE.Mesh(innerSphereGeometry, innerSphereMaterial);
+            centerGroup.add(innerSphere);
+            
+            const coreGeometry = new THREE.SphereGeometry(0.5, 16, 16);
+            const coreMaterial = new THREE.MeshBasicMaterial({
+                color: 0xffffff,
+                transparent: true,
+                opacity: 0.9,
+                blending: THREE.AdditiveBlending
+            });
+            const core = new THREE.Mesh(coreGeometry, coreMaterial);
+            centerGroup.add(core);
+            
+            const labelDiv = document.createElement('div');
+            labelDiv.className = 'center-label';
+            labelDiv.textContent = '碳';
+            const centerLabel = new CSS2DObject(labelDiv);
+            centerLabel.position.set(0, 0, 0);
+            centerGroup.add(centerLabel);
+            
+            centralParticles = new ParticleSystem(Math.floor(800 * MOBILE_PARTICLE_SCALE), 0x00ff88, isMobile ? 0.1 : 0.08);
+            scene.add(centralParticles.points);
+            
+            scene.add(centerGroup);
+        }
+
+        function createFlowSystem() {
+            flowParticles = [];
+            
+            for (let i = 0; i < 8; i++) {
+                const startIdx = i;
+                const endIdx = (i + 1) % 8;
+                const count = isMobile ? 12 : 30;
+                
+                for (let j = 0; j < count; j++) {
+                    const particleGeom = new THREE.SphereGeometry(0.08, 8, 8);
+                    const particleMat = new THREE.MeshBasicMaterial({
+                        color: 0x00d4ff,
+                        transparent: true,
+                        opacity: 0.8,
+                        blending: THREE.AdditiveBlending
+                    });
+                    const particle = new THREE.Mesh(particleGeom, particleMat);
+                    
+                    particle.userData = {
+                        startPos: flowSteps[startIdx].position.clone(),
+                        endPos: flowSteps[endIdx].position.clone(),
+                        progress: j / count,
+                        speed: 0.3 + Math.random() * 0.2
+                    };
+                    
+                    scene.add(particle);
+                    flowParticles.push(particle);
+                }
+            }
+        }
+
+        function createFlowLabels() {
+            flowSteps.forEach((step, index) => {
+                const labelDiv = document.createElement('div');
+                labelDiv.className = 'flow-label';
+                labelDiv.innerHTML = `<span class="step-num">STEP ${String(index + 1).padStart(2, '0')}</span>${step.name}`;
+                
+                const label = new CSS2DObject(labelDiv);
+                label.position.copy(step.position);
+                scene.add(label);
+                flowLabels.push({ label, index, div: labelDiv });
+            });
+        }
+
+        function createThreeEndVisualization() {
+            const frontEndGroup = new THREE.Group();
+            frontEndGroup.position.set(-12, 3, 8);
+            
+            frontEndParticles = new ParticleSystem(Math.floor(300 * MOBILE_PARTICLE_SCALE), 0x00ff88, isMobile ? 0.13 : 0.1);
+            frontEndParticles.points.position.copy(frontEndGroup.position);
+            scene.add(frontEndParticles.points);
+            
+            const frontHumanGeom = new THREE.TorusGeometry(0.8, 0.05, 8, 32);
+            const frontHumanMat = new THREE.MeshBasicMaterial({
+                color: 0x00ff88,
+                transparent: true,
+                opacity: 0.5,
+                blending: THREE.AdditiveBlending
+            });
+            const humanHead = new THREE.Mesh(frontHumanGeom, frontHumanMat);
+            humanHead.position.copy(frontEndGroup.position);
+            humanHead.position.y += 1.5;
+            scene.add(humanHead);
+            
+            const bodyGeom = new THREE.CylinderGeometry(0.4, 0.6, 1.5, 8);
+            const body = new THREE.Mesh(bodyGeom, frontHumanMat);
+            body.position.copy(frontEndGroup.position);
+            scene.add(body);
+            
+            const midEndGroup = new THREE.Group();
+            midEndGroup.position.set(0, 3, -12);
+            
+            midEndParticles = new ParticleSystem(Math.floor(300 * MOBILE_PARTICLE_SCALE), 0xffd700, isMobile ? 0.13 : 0.1);
+            midEndParticles.points.position.copy(midEndGroup.position);
+            scene.add(midEndParticles.points);
+            
+            const gavelHeadGeom = new THREE.BoxGeometry(1.2, 0.4, 0.4);
+            const gavelMat = new THREE.MeshBasicMaterial({
+                color: 0xffd700,
+                transparent: true,
+                opacity: 0.5,
+                blending: THREE.AdditiveBlending
+            });
+            const gavelHead = new THREE.Mesh(gavelHeadGeom, gavelMat);
+            gavelHead.position.copy(midEndGroup.position);
+            gavelHead.position.y += 1.2;
+            scene.add(gavelHead);
+            
+            const gavelHandleGeom = new THREE.CylinderGeometry(0.08, 0.08, 1.2, 8);
+            const gavelHandle = new THREE.Mesh(gavelHandleGeom, gavelMat);
+            gavelHandle.position.copy(midEndGroup.position);
+            gavelHandle.position.y += 0.4;
+            scene.add(gavelHandle);
+            
+            const backEndGroup = new THREE.Group();
+            backEndGroup.position.set(12, 3, 8);
+            
+            backEndParticles = new ParticleSystem(Math.floor(300 * MOBILE_PARTICLE_SCALE), 0x00d4ff, isMobile ? 0.13 : 0.1);
+            backEndParticles.points.position.copy(backEndGroup.position);
+            scene.add(backEndParticles.points);
+            
+            const cubeGeom = new THREE.BoxGeometry(1, 1, 1);
+            const edgesGeom = new THREE.EdgesGeometry(cubeGeom);
+            const cubeMat = new THREE.LineBasicMaterial({
+                color: 0x00d4ff,
+                transparent: true,
+                opacity: 0.5
+            });
+            const cubeWireframe = new THREE.LineSegments(edgesGeom, cubeMat);
+            cubeWireframe.position.copy(backEndGroup.position);
+            scene.add(cubeWireframe);
+            
+            const innerCubeGeom = new THREE.BoxGeometry(0.5, 0.5, 0.5);
+            const innerEdgesGeom = new THREE.EdgesGeometry(innerCubeGeom);
+            const innerCube = new THREE.LineSegments(innerEdgesGeom, cubeMat);
+            innerCube.position.copy(backEndGroup.position);
+            scene.add(innerCube);
+            
+            createConnectionLines();
+        }
+
+        function createConnectionLines() {
+            const centerPos = new THREE.Vector3(0, 2, 0);
+            const frontPos = new THREE.Vector3(-12, 3, 8);
+            const midPos = new THREE.Vector3(0, 3, -12);
+            const backPos = new THREE.Vector3(12, 3, 8);
+            
+            const linePositions = [
+                { start: centerPos, end: frontPos },
+                { start: centerPos, end: midPos },
+                { start: centerPos, end: backPos }
+            ];
+            
+            linePositions.forEach(({ start, end }) => {
+                const points = [];
+                const segments = 20;
+                for (let i = 0; i <= segments; i++) {
+                    const t = i / segments;
+                    const point = new THREE.Vector3().lerpVectors(start, end, t);
+                    point.y += Math.sin(t * Math.PI) * 0.5;
+                    points.push(point);
+                }
+                
+                const lineGeom = new THREE.BufferGeometry().setFromPoints(points);
+                const lineMat = new THREE.LineBasicMaterial({
+                    color: 0x00ff88,
+                    transparent: true,
+                    opacity: 0.3,
+                    blending: THREE.AdditiveBlending
+                });
+                const line = new THREE.Line(lineGeom, lineMat);
+                scene.add(line);
+            });
+        }
+
+        function createEndLabels() {
+            const frontDiv = document.createElement('div');
+            frontDiv.className = 'end-label';
+            frontDiv.style.borderColor = '#00ff88';
+            frontDiv.textContent = '前端 · 公众/当事人';
+            const frontLabel = new CSS2DObject(frontDiv);
+            frontLabel.position.set(-12, 5.5, 8);
+            scene.add(frontLabel);
+            
+            const midDiv = document.createElement('div');
+            midDiv.className = 'end-label';
+            midDiv.style.borderColor = '#ffd700';
+            midDiv.textContent = '中端 · 法官/检察官';
+            const midLabel = new CSS2DObject(midDiv);
+            midLabel.position.set(0, 5.5, -12);
+            scene.add(midLabel);
+            
+            const backDiv = document.createElement('div');
+            backDiv.className = 'end-label';
+            backDiv.style.borderColor = '#00d4ff';
+            backDiv.textContent = '后端 · 林草局/碳交所';
+            const backLabel = new CSS2DObject(backDiv);
+            backLabel.position.set(12, 5.5, 8);
+            scene.add(backLabel);
+        }
+
+        function createEnvironment() {
+            const gridSize = 80;
+            const gridDivisions = 40;
+            const gridHelper = new THREE.GridHelper(gridSize, gridDivisions, 0x00ff88, 0x004422);
+            gridHelper.position.y = -3;
+            gridHelper.material.transparent = true;
+            gridHelper.material.opacity = 0.3;
+            scene.add(gridHelper);
+            
+            const floorGeometry = new THREE.PlaneGeometry(100, 100);
+            const floorMaterial = new THREE.MeshBasicMaterial({
+                color: 0x0a0e17,
+                transparent: true,
+                opacity: 0.5,
+                side: THREE.DoubleSide
+            });
+            gridFloor = new THREE.Mesh(floorGeometry, floorMaterial);
+            gridFloor.rotation.x = -Math.PI / 2;
+            gridFloor.position.y = -3.01;
+            scene.add(gridFloor);
+            
+            starField = new ParticleSystem(Math.floor(600 * MOBILE_PARTICLE_SCALE), 0xffffff, isMobile ? 0.6 : 0.5);
+            const sfCount = starField.count;
+            for (let i = 0; i < sfCount; i++) {
+                const theta = Math.random() * Math.PI * 2;
+                const phi = Math.random() * Math.PI;
+                const r = 60 + Math.random() * 40;
+                
+                starField.positions[i * 3] = r * Math.sin(phi) * Math.cos(theta);
+                starField.positions[i * 3 + 1] = r * Math.cos(phi);
+                starField.positions[i * 3 + 2] = r * Math.sin(phi) * Math.sin(theta);
+                
+                starField.speeds[i] = 0.1 + Math.random() * 0.2;
+            }
+            starField.geometry.attributes.position.needsUpdate = true;
+            scene.add(starField.points);
+            
+            nebulaParticles = new ParticleSystem(Math.floor(200 * MOBILE_PARTICLE_SCALE), 0x4400ff, 2);
+            const nbCount = nebulaParticles.count;
+            for (let i = 0; i < nbCount; i++) {
+                const theta = Math.random() * Math.PI * 2;
+                const phi = Math.random() * Math.PI;
+                const r = 70 + Math.random() * 30;
+                
+                nebulaParticles.positions[i * 3] = r * Math.sin(phi) * Math.cos(theta);
+                nebulaParticles.positions[i * 3 + 1] = r * Math.cos(phi) * 0.5;
+                nebulaParticles.positions[i * 3 + 2] = r * Math.sin(phi) * Math.sin(theta);
+                
+                nebulaParticles.speeds[i] = 0.05;
+            }
+            nebulaParticles.geometry.attributes.position.needsUpdate = true;
+            nebulaParticles.material.opacity = 0.3;
+            scene.add(nebulaParticles.points);
+            
+            createKarstOutline();
+        }
+
+        function createKarstOutline() {
+            const karstPoints = [
+                new THREE.Vector3(-40, -2, -30),
+                new THREE.Vector3(-35, 5, -35),
+                new THREE.Vector3(-30, 8, -32),
+                new THREE.Vector3(-25, 3, -30),
+                new THREE.Vector3(-20, 6, -35),
+                new THREE.Vector3(-15, -1, -32),
+            ];
+            
+            const curve = new THREE.CatmullRomCurve3(karstPoints, false);
+            const tubeGeometry = new THREE.TubeGeometry(curve, 50, 0.1, 8, false);
+            const tubeMaterial = new THREE.MeshBasicMaterial({
+                color: 0x00ff88,
+                transparent: true,
+                opacity: 0.2,
+                blending: THREE.AdditiveBlending
+            });
+            const tube = new THREE.Mesh(tubeGeometry, tubeMaterial);
+            scene.add(tube);
+            
+            const karstPoints2 = [
+                new THREE.Vector3(35, -2, -35),
+                new THREE.Vector3(38, 6, -30),
+                new THREE.Vector3(42, 10, -35),
+                new THREE.Vector3(38, 4, -40),
+            ];
+            
+            const curve2 = new THREE.CatmullRomCurve3(karstPoints2, false);
+            const tubeGeometry2 = new THREE.TubeGeometry(curve2, 30, 0.1, 8, false);
+            const tube2 = new THREE.Mesh(tubeGeometry2, tubeMaterial);
+            scene.add(tube2);
+        }
+
+        function updateVortex(particles, center, radius, time, speed) {
+            const positions = particles.geometry.attributes.position.array;
+            
+            for (let i = 0; i < particles.count; i++) {
+                const idx = i * 3;
+                const angle = (i / particles.count) * Math.PI * 8 + time * speed;
+                const r = radius + Math.sin(angle * 2 + time) * 0.3;
+                const height = Math.sin(angle * 3 + time * 0.5) * 1.5;
+                
+                positions[idx] = center.x + Math.cos(angle) * r;
+                positions[idx + 1] = center.y + height;
+                positions[idx + 2] = center.z + Math.sin(angle) * r;
+            }
+            
+            particles.geometry.attributes.position.needsUpdate = true;
+        }
+
+        function updateFlowParticles(delta) {
+            flowPhase += delta * 0.3;
+            const activeIndex = Math.floor(flowPhase) % 8;
+            
+            flowLabels.forEach((item, idx) => {
+                if (idx === activeIndex) {
+                    item.div.classList.add('active');
+                } else {
+                    item.div.classList.remove('active');
+                }
+            });
+            
+            flowParticles.forEach(particle => {
+                const { startPos, endPos, speed } = particle.userData;
+                const segmentIndex = Math.floor(flowPhase) % 8;
+                const baseProgress = (flowPhase % 1);
+                
+                const currentSegment = parseInt(flowParticles.indexOf(particle) / 30);
+                let localProgress = (flowPhase * 30 + flowParticles.indexOf(particle)) % 240;
+                localProgress = localProgress / 240;
+                
+                const segIndex = Math.floor(localProgress * 8);
+                const segProgress = (localProgress * 8) % 1;
+                
+                const sPos = flowSteps[segIndex].position;
+                const ePos = flowSteps[(segIndex + 1) % 8].position;
+                
+                particle.position.lerpVectors(sPos, ePos, segProgress);
+                
+                const pulse = Math.sin(localProgress * Math.PI * 4) * 0.5 + 0.5;
+                particle.material.opacity = pulse * 0.9;
+                particle.scale.setScalar(0.5 + pulse * 0.5);
+            });
+        }
+
+        function updateDataPanel() {
+            document.getElementById('cases').textContent = dataValues.cases.toLocaleString();
+            document.getElementById('carbon').textContent = dataValues.carbon.toLocaleString();
+            document.getElementById('credits').textContent = dataValues.credits.toLocaleString();
+            document.getElementById('completion').textContent = dataValues.completion.toFixed(1);
+            document.getElementById('judicial').textContent = dataValues.judicial.toLocaleString();
+        }
+
+        function startDataUpdate() {
+            setInterval(() => {
+                dataValues.cases += Math.floor(Math.random() * 5);
+                dataValues.carbon += Math.floor(Math.random() * 20);
+                dataValues.credits += Math.floor(Math.random() * 100);
+                dataValues.completion = Math.min(99.9, dataValues.completion + Math.random() * 0.5);
+                dataValues.judicial += Math.floor(Math.random() * 2);
+                updateDataPanel();
+            }, 3000);
+        }
+
+        function onWindowResize() {
+            camera.aspect = window.innerWidth / window.innerHeight;
+            camera.updateProjectionMatrix();
+            renderer.setSize(window.innerWidth, window.innerHeight);
+            renderer.setPixelRatio(Math.min(window.devicePixelRatio, (window.innerWidth < 768) ? 1.5 : 2));
+            composer.setSize(window.innerWidth, window.innerHeight);
+            labelRenderer.setSize(window.innerWidth, window.innerHeight);
+        }
+
+        function animate() {
+            animationId = requestAnimationFrame(animate);
+            
+            const delta = clock.getDelta();
+            const time = clock.getElapsedTime();
+            
+            cameraBreathPhase += delta * 0.3;
+            const breathOffset = Math.sin(cameraBreathPhase) * 2;
+            const baseDistance = 20;
+            camera.position.y = 8 + Math.sin(cameraBreathPhase * 0.7) * 1;
+            
+            controls.update();
+            
+            updateVortex(leftVortex, new THREE.Vector3(-4, 2, 0), 1.5, time, 0.8);
+            updateVortex(rightVortex, new THREE.Vector3(4, 2, 0), 1.5, time, -0.8);
+            
+            const centralPos = centralParticles.geometry.attributes.position.array;
+            for (let i = 0; i < centralParticles.count; i++) {
+                const idx = i * 3;
+                const angle = (i / centralParticles.count) * Math.PI * 12 + time * 0.3;
+                const r = 2 + Math.sin(angle + time) * 0.5;
+                const height = Math.cos(angle * 2 + time * 0.5) * 2;
+                
+                centralPos[idx] = Math.cos(angle) * r;
+                centralPos[idx + 1] = height;
+                centralPos[idx + 2] = Math.sin(angle) * r;
+            }
+            centralParticles.geometry.attributes.position.needsUpdate = true;
+            
+            updateFlowParticles(delta);
+            
+            const frontPos = new THREE.Vector3(-12, 3, 8);
+            const midPos = new THREE.Vector3(0, 3, -12);
+            const backPos = new THREE.Vector3(12, 3, 8);
+            
+            updateVortex(frontEndParticles, frontPos, 1.2, time, 0.5);
+            updateVortex(midEndParticles, midPos, 1.2, time, 0.5);
+            updateVortex(backEndParticles, backPos, 1.2, time, 0.5);
+            
+            const starPos = starField.geometry.attributes.position.array;
+            for (let i = 0; i < starField.count; i++) {
+                const idx = i * 3;
+                starPos[idx + 1] += starField.speeds[i] * 0.01;
+                
+                if (starPos[idx + 1] > 100) {
+                    starPos[idx + 1] = -100;
+                }
+            }
+            starField.geometry.attributes.position.needsUpdate = true;
+            
+            if (centerSphere) {
+                centerSphere.rotation.y += delta * 0.2;
+                centerSphere.rotation.x = Math.sin(time * 0.5) * 0.1;
+            }
+            
+            composer.render();
+            labelRenderer.render(scene, camera);
+        }
+
+        init();
+    </script>
+</body>
+</html>
